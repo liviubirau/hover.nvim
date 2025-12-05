@@ -89,7 +89,17 @@ function LSPProvider:execute(params, done)
       if vim.tbl_isempty(lines) then
         lines = { 'empty' }
       end
-      done({ lines = lines, filetype = 'markdown' })
+
+      local outlines = {}
+      for _, line in ipairs(lines) do
+        -- remove stray backslashes before adding the line
+        if line:find('\\') then
+          line = line:gsub('\\', '')
+        end
+        table.insert(outlines, line)
+      end
+
+      done({ lines = outlines, filetype = 'markdown' })
     end
   end, params.bufnr)
 end

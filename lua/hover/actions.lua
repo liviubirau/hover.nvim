@@ -200,7 +200,7 @@ local function run_provider(provider, providers, bufnr, popts)
   local result = async.await(2, provider.execute, {
     bufnr = bufnr,
     pos = popts.pos or api.nvim_win_get_cursor(0),
-  })
+  }) or { lines = { 'No result' } }
 
   async.scheduler()
   if result then

@@ -43,6 +43,24 @@ local function close_preview_autocmd(winid, hover_bufnr, bufnr)
   })
 end
 
+--- Splits any lines containing embedded newlines into separate lines.
+--- This is needed because nvim_buf_set_lines doesn't accept strings with newlines.
+--- @param lines string[]
+--- @return string[]
+local function flatten_lines(lines)
+  local result = {}
+  for _, line in ipairs(lines) do
+    if line:find('\n') then
+      for _, split_line in ipairs(vim.split(line, '\n', { plain = true })) do
+        result[#result + 1] = split_line
+      end
+    else
+      result[#result + 1] = line
+    end
+  end
+  return result
+end
+
 --- @param lines string[]
 --- @return string[]
 local function trim_empty_lines(lines)
@@ -361,6 +379,8 @@ function M.open_floating_preview(contents, bufnr, syntax, opts)
       local ro = vim.bo[floating_bufnr].readonly
       vim.bo[floating_bufnr].modifiable = true
       vim.bo[floating_bufnr].readonly = false
+      -- Flatten any lines containing embedded newlines (nvim_buf_set_lines doesn't accept them)
+      contents = flatten_lines(contents)
       api.nvim_buf_set_lines(floating_bufnr, 0, -1, true, contents)
       vim.bo[floating_bufnr].modifiable = m
       vim.bo[floating_bufnr].readonly = ro

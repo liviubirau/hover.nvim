@@ -307,6 +307,11 @@ function M.switch(direction, opts)
   -- -1 and +1 to convert to 0-indexed and back
   local provider_id_sel = ((current_provider_idx + offset - 1) % #providers) + 1
   local provider = assert(providers[provider_id_sel])
+
+  -- Close the existing hover window before running the new provider
+  -- This prevents do_hover() from returning early in run_provider
+  api.nvim_win_close(hover_win, true)
+
   async.run(run_provider, provider, providers, bufnr, opts)
 end
 
@@ -324,6 +329,11 @@ function M.select(opts)
     end,
   }, function(provider)
     if provider then
+      -- Close any existing hover window before running the new provider
+      local hover_win = vim.b[bufnr].hover_preview
+      if hover_win and api.nvim_win_is_valid(hover_win) then
+        api.nvim_win_close(hover_win, true)
+      end
       async.run(run_provider, provider, providers, bufnr, opts)
     end
   end)

@@ -348,7 +348,9 @@ function M.open_floating_preview(contents, bufnr, syntax, opts)
   -- disable folding
   -- schedule so it runs after treesitter folding
   vim.schedule(function()
-    vim.wo[hover_winid].foldenable = false
+    if api.nvim_win_is_valid(hover_winid) then
+      vim.wo[hover_winid].foldenable = false
+    end
   end)
   -- soft wrapping
   vim.wo[hover_winid].wrap = opts.wrap
